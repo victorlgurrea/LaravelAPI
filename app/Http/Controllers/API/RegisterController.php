@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\User;
+use App\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
    
@@ -19,7 +20,7 @@ class RegisterController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required',
             'c_password' => 'required|same:password',
         ]);
@@ -30,16 +31,12 @@ class RegisterController extends BaseController
    
         $input = $request->all();
 
-        $checkUser = User::where('email',$input['email'])->first();
-        
-        if ($checkUser){
-            return $this->sendError('Usuario ya registrado.', ['error'=>'Email ya registrado']);
-        }
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
         $success['token'] =  $user->createToken('Token')->accessToken;
         $success['name'] =  $user->name;
-   
+        $user->roles()->attach(Role::where('name', 'user')->first());
+
         return $this->sendResponse($success, 'User register successfully.');
     }
    

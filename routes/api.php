@@ -17,5 +17,5 @@ Route::post('register', 'API\RegisterController@register');
 Route::post('login', 'API\RegisterController@login')->name('login');
    
 Route::middleware('auth:api')->group( function () {
-    Route::resource('products', 'API\ProductController');
+    Route::resource('products', 'API\ProductController')->middleware('role:admin');;
 });
